@@ -1,0 +1,256 @@
+{
+  "name": "SnapCut AI - Background Removal Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "snapcut-remove-bg",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "SnapCut Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "snapcut-remove-bg"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $headers['x-n8n-webhook-secret'] }}",
+              "operation": "equals",
+              "value2": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        }
+      },
+      "id": "auth-guard",
+      "name": "Verify Webhook Secret",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.input_url }}",
+        "responseFormat": "file",
+        "options": {}
+      },
+      "id": "download-image",
+      "name": "Fetch Original Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://clipdrop-api.co/remove-background/v1",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data:image_file",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "call-ai-api",
+      "name": "AI Background Removal API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudinary.com/v1_1/{{ $env.CLOUDINARY_CLOUD_NAME }}/image/upload",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data:file",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "upload_preset",
+              "value": "snapcut_temp_output"
+            },
+            {
+              "name": "folder",
+              "value": "snapcut/temp/results"
+            },
+            {
+              "name": "tags",
+              "value": "snapcut,temp_result,job_{{ $('SnapCut Webhook Trigger').item.json.body.job_id }}"
+            }
+          ]
+        }
+      },
+      "id": "upload-cloudinary",
+      "name": "Upload Transparent Result to Cloudinary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('SnapCut Webhook Trigger').item.json.body.callback_url || ($env.BACKEND_URL + '/api/jobs/n8n-callback') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-n8n-callback-secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "job_id",
+              "value": "={{ $('SnapCut Webhook Trigger').item.json.body.job_id }}"
+            },
+            {
+              "name": "status",
+              "value": "completed"
+            },
+            {
+              "name": "output_url",
+              "value": "={{ $json.secure_url }}"
+            },
+            {
+              "name": "output_asset_id",
+              "value": "={{ $json.public_id }}"
+            },
+            {
+              "name": "duration_ms",
+              "value": "={{ Date.now() - new Date($('SnapCut Webhook Trigger').item.json.body.timestamp).getTime() }}"
+            }
+          ]
+        }
+      },
+      "id": "callback-backend-success",
+      "name": "Callback Backend (Success)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1340, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('SnapCut Webhook Trigger').item.json.body.callback_url || ($env.BACKEND_URL + '/api/jobs/n8n-callback') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-n8n-callback-secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "job_id",
+              "value": "={{ $('SnapCut Webhook Trigger').item.json.body.job_id }}"
+            },
+            {
+              "name": "status",
+              "value": "failed"
+            },
+            {
+              "name": "error_code",
+              "value": "AI_PROCESSING_ERROR"
+            },
+            {
+              "name": "error_message",
+              "value": "={{ $json.error ? $json.error.message : 'External AI service could not process image' }}"
+            }
+          ]
+        }
+      },
+      "id": "callback-backend-failure",
+      "name": "Callback Backend (Failure)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 480]
+    }
+  ],
+  "connections": {
+    "SnapCut Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Verify Webhook Secret",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Webhook Secret": {
+      "main": [
+        [
+          {
+            "node": "Fetch Original Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Original Image": {
+      "main": [
+        [
+          {
+            "node": "AI Background Removal API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Background Removal API": {
+      "main": [
+        [
+          {
+            "node": "Upload Transparent Result to Cloudinary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Transparent Result to Cloudinary": {
+      "main": [
+        [
+          {
+            "node": "Callback Backend (Success)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
