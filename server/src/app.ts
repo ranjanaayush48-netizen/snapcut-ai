@@ -29,12 +29,14 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
       if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
         return callback(null, true);
       }
-      return callback(null, true); // Permissive in development, strict in prod
+      if (origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com') || origin.includes('railway.app') || origin.includes('fly.dev')) {
+        return callback(null, true);
+      }
+      return callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

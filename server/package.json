@@ -2,6 +2,7 @@
   "name": "snapcut-server",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "SnapCut AI Express + TypeScript Backend API",
   "main": "dist/server.js",
   "scripts": {

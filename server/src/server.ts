@@ -3,7 +3,7 @@ import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 
 const PORT = env.PORT || 5000;
-const HOST = '127.0.0.1';
+const HOST = env.HOST || '0.0.0.0';
 
 const server = app.listen(PORT, HOST, () => {
   logger.info(`✨ SnapCut AI Backend API running at http://${HOST}:${PORT}`);
