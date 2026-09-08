@@ -1,6 +1,11 @@
 import dotenv from 'dotenv';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 
+const here = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(here, '../../.env') });
+dotenv.config({ path: path.resolve(here, '../.env') });
 dotenv.config();
 
 const envSchema = z.object({
@@ -15,7 +20,10 @@ const envSchema = z.object({
   SUPABASE_JWT_SECRET: z.string().optional().default('mock-jwt-secret'),
 
   // n8n Cloud
-  N8N_WEBHOOK_URL: z.string().optional().default(''),
+  N8N_WEBHOOK_URL: z
+    .string()
+    .optional()
+    .default('https://asdfgfdf.app.n8n.cloud/webhook/remove-background'),
   N8N_WEBHOOK_SECRET: z.string().optional().default('snapcut-dev-secret-token'),
 
   // Cloudinary

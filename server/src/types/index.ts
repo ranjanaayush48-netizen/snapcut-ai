@@ -12,6 +12,12 @@ export interface AuthUser {
   plan: PlanTier;
 }
 
+export interface AuthSession {
+  user: AuthUser;
+  token: string;
+  expiresAt?: number;
+}
+
 export interface Profile {
   id: string;
   userId: string;

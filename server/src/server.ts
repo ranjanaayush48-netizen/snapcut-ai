@@ -3,9 +3,10 @@ import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 
 const PORT = env.PORT || 5000;
+const HOST = '127.0.0.1';
 
-const server = app.listen(PORT, () => {
-  logger.info(`✨ SnapCut AI Backend API running at http://localhost:${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  logger.info(`✨ SnapCut AI Backend API running at http://${HOST}:${PORT}`);
   logger.info(`🔧 Environment: ${env.NODE_ENV}`);
   logger.info(`🌐 Frontend URL: ${env.FRONTEND_URL}`);
   logger.info(`🤖 Background Removal Provider: ${env.BACKGROUND_REMOVAL_PROVIDER}`);

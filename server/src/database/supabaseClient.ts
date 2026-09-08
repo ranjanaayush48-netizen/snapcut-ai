@@ -7,7 +7,9 @@ import {
   UsageRecord,
   CreditRecord,
   SubscriptionRecord,
-  PaymentRecord
+  PaymentRecord,
+  UserRole,
+  PlanTier
 } from '../types/index.js';
 
 let supabaseClient: SupabaseClient | null = null;
@@ -45,7 +47,18 @@ export const supabase = supabaseClient;
  * High-fidelity repository layer that routes to live Supabase when available
  * or operates an in-memory transactional datastore for zero-config development.
  */
+export interface UserCredential {
+  id: string;
+  email: string;
+  passwordHash: string;
+  displayName: string;
+  role: UserRole;
+  plan: PlanTier;
+  createdAt: string;
+}
+
 class DatabaseRepository {
+  private users = new Map<string, UserCredential>();
   private profiles = new Map<string, Profile>();
   private jobs = new Map<string, ProcessingJob>();
   private usage = new Map<string, UsageRecord>(); // key: `${userId}_${date}`
@@ -58,6 +71,19 @@ class DatabaseRepository {
     // Seed test users for instant zero-config testing
     const demoUserId = '00000000-0000-0000-0000-000000000001';
     const adminUserId = '00000000-0000-0000-0000-000000000002';
+
+    // Default password hash for 'password123'
+    const defaultHash = '3f9a7d189b821a42:95b11a5113d8d6411516e872c67f0b9fbc7465355ebdf342d76ee1780517f9189c49ca3a4c4a45610ec871c5ec1086a9f73a3ff0cb7cf05f778643190df0353c';
+
+    this.users.set(demoUserId, {
+      id: demoUserId,
+      email: 'demo@snapcut.ai',
+      passwordHash: defaultHash,
+      displayName: 'Alex Rivers',
+      role: 'user',
+      plan: 'free',
+      createdAt: new Date(Date.now() - 7 * 86400000).toISOString()
+    });
 
     this.profiles.set(demoUserId, {
       id: 'prof-demo-1',
@@ -76,6 +102,16 @@ class DatabaseRepository {
       updatedAt: new Date().toISOString()
     });
 
+    this.users.set(adminUserId, {
+      id: adminUserId,
+      email: 'admin@snapcut.ai',
+      passwordHash: defaultHash,
+      displayName: 'SnapCut Admin',
+      role: 'admin',
+      plan: 'business',
+      createdAt: new Date(Date.now() - 30 * 86400000).toISOString()
+    });
+
     this.profiles.set(adminUserId, {
       id: 'prof-admin-1',
       userId: adminUserId,
@@ -92,6 +128,56 @@ class DatabaseRepository {
       balance: 500,
       updatedAt: new Date().toISOString()
     });
+  }
+
+  // --- User Credentials ---
+  async findUserCredentialByEmail(email: string): Promise<UserCredential | null> {
+    const normalized = email.toLowerCase().trim();
+    for (const user of this.users.values()) {
+      if (user.email.toLowerCase() === normalized) {
+        return user;
+      }
+    }
+    return null;
+  }
+
+  async findUserCredentialById(id: string): Promise<UserCredential | null> {
+    return this.users.get(id) || null;
+  }
+
+  async createUserCredential(
+    email: string,
+    passwordHash: string,
+    displayName: string,
+    role: UserRole = 'user',
+    plan: PlanTier = 'free'
+  ): Promise<UserCredential> {
+    const id = `usr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date().toISOString();
+    const cred: UserCredential = {
+      id,
+      email: email.toLowerCase().trim(),
+      passwordHash,
+      displayName,
+      role,
+      plan,
+      createdAt: now
+    };
+    this.users.set(id, cred);
+
+    // Initialize Profile
+    await this.upsertProfile(id, { displayName, plan, role });
+    // Initialize 5 starter credits
+    await this.setCredits(id, 5);
+
+    return cred;
+  }
+
+  async updateUserPassword(userId: string, newPasswordHash: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (!user) return false;
+    user.passwordHash = newPasswordHash;
+    return true;
   }
 
   // --- Profiles ---

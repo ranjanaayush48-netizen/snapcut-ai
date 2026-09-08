@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { UploadDropzone } from '../components/upload/UploadDropzone.js';
 import { ProcessingStatus } from '../components/processing/ProcessingStatus.js';
 import { BeforeAfterViewer } from '../components/result/BeforeAfterViewer.js';
@@ -10,17 +10,60 @@ import { useToast } from '../contexts/ToastContext.js';
 import { apiClient } from '../api/client.js';
 import { Sparkles, Shield, Zap } from 'lucide-react';
 
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 120000;
+
+const unwrap = (response: any) => {
+  if (!response) return response;
+  if (typeof response === 'object' && 'success' in response && 'data' in response) {
+    return response.data;
+  }
+  if (typeof response === 'object' && 'data' in response) {
+    return response.data;
+  }
+  return response;
+};
+
 export const RemoveBgPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [result, setResult] = useState<{ originalUrl: string; outputUrl: string; filename: string } | null>(null);
+  const stopPollingRef = useRef(false);
 
   const { usage, refreshUsage } = useAuth();
   const { showToast } = useToast();
 
+  useEffect(() => {
+    return () => {
+      stopPollingRef.current = true;
+    };
+  }, []);
+
+  const wait = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+  const pollForCompletion = async (jobId: string): Promise<{ jobId: string; inputUrl: string; outputUrl?: string; originalFilename: string; status: string }> => {
+    const start = Date.now();
+    stopPollingRef.current = false;
+    while (!stopPollingRef.current && Date.now() - start < POLL_TIMEOUT_MS) {
+      const res = await apiClient.get(`/jobs/${jobId}`);
+      const job = unwrap(res) as any;
+      if (!job) {
+        await wait(POLL_INTERVAL_MS);
+        continue;
+      }
+      if (job.status === 'completed' || job.status === 'failed') {
+        return job;
+      }
+      await wait(POLL_INTERVAL_MS);
+    }
+    throw new Error('Processing is taking longer than expected. Please check History for result.');
+  };
+
   const handleProcessImage = async () => {
     if (!selectedFile) return;
+
+    stopPollingRef.current = false;
 
     try {
       setIsProcessing(true);
@@ -29,15 +72,36 @@ export const RemoveBgPage: React.FC = () => {
       const formData = new FormData();
       formData.append('image', selectedFile);
 
-      const res = await apiClient.post('/remove-background', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const submitRes = await apiClient.post('/remove-background', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000
       });
 
-      const data = res.data;
+      const submit = unwrap(submitRes) as any;
+      if (!submit || !submit.jobId) {
+        throw new Error("Couldn't create a processing job. Please try again.");
+      }
+
+      if (submit.status === 'completed' && submit.outputUrl) {
+        setResult({
+          originalUrl: submit.inputUrl,
+          outputUrl: submit.outputUrl,
+          filename: submit.originalFilename
+        });
+        await refreshUsage();
+        showToast('Background removed successfully!', 'success');
+        return;
+      }
+
+      const job = await pollForCompletion(submit.jobId);
+      if (job.status === 'failed') {
+        throw new Error("We couldn't process this image right now. Please try again.");
+      }
+
       setResult({
-        originalUrl: data.inputUrl,
-        outputUrl: data.outputUrl,
-        filename: data.originalFilename
+        originalUrl: job.inputUrl || submit.inputUrl,
+        outputUrl: job.outputUrl as string,
+        filename: job.originalFilename || submit.originalFilename
       });
 
       await refreshUsage();
@@ -50,6 +114,7 @@ export const RemoveBgPage: React.FC = () => {
   };
 
   const handleReset = () => {
+    stopPollingRef.current = true;
     setSelectedFile(null);
     setResult(null);
     setProcessingError(null);

@@ -62,18 +62,33 @@ export class JobService {
 
     // 5. Orchestrate AI processing: n8n Cloud vs Direct Internal Service
     if (n8nService.isEnabled()) {
-      const callbackUrl = `${env.FRONTEND_URL ? env.FRONTEND_URL.replace('5173', '5000') : 'http://localhost:5000'}/api/jobs/n8n-callback`;
-      const triggered = await n8nService.triggerWorkflow({
+      const baseBackendUrl = env.FRONTEND_URL ? env.FRONTEND_URL.replace('5173', '5000') : 'http://localhost:5000';
+      const callbackUrl = `${baseBackendUrl}/api/jobs/n8n-callback?job_id=${encodeURIComponent(job.id)}`;
+      const n8nResult = await n8nService.triggerWorkflow({
         jobId: job.id,
         userId,
         inputUrl,
         originalFilename,
         callbackUrl,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        mimeType,
+        imageBuffer: buffer
       });
 
-      if (triggered) {
-        // Asynchronous processing handed over to n8n Cloud
+      if (n8nResult.accepted && n8nResult.outputUrl) {
+        const durationMs = Date.now() - startTime;
+        const completedJob = await db.updateJob(job.id, {
+          status: 'completed',
+          outputUrl: n8nResult.outputUrl,
+          outputAssetId: n8nResult.outputAssetId,
+          completedAt: new Date().toISOString(),
+          durationMs
+        });
+        return completedJob || { ...job, status: 'completed', outputUrl: n8nResult.outputUrl };
+      }
+
+      if (n8nResult.accepted) {
+        // Workflow started; result will arrive via callback when n8n can reach this backend
         return job;
       }
       logger.info('Falling back to direct background removal service pipeline');

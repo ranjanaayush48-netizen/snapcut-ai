@@ -19,15 +19,31 @@ export const updateProfileSchema = z.object({
   displayName: z.string().min(2, 'Display name must be at least 2 characters').max(50)
 });
 
-export const n8nCallbackSchema = z.object({
-  job_id: z.string().min(1),
-  status: z.enum(['completed', 'failed']),
-  output_url: z.string().optional(),
-  output_asset_id: z.string().optional(),
-  error_code: z.string().optional(),
-  error_message: z.string().optional(),
-  duration_ms: z.number().optional()
-});
+export const n8nCallbackSchema = z
+  .object({
+    job_id: z.string().optional(),
+    jobId: z.string().optional(),
+    status: z.enum(['completed', 'failed']).optional(),
+    output_url: z.string().optional(),
+    outputUrl: z.string().optional(),
+    output_asset_id: z.string().optional(),
+    outputAssetId: z.string().optional(),
+    error_code: z.string().optional(),
+    errorCode: z.string().optional(),
+    error_message: z.string().optional(),
+    errorMessage: z.string().optional(),
+    duration_ms: z.number().optional(),
+    durationMs: z.number().optional(),
+    url: z.string().optional(),
+    secure_url: z.string().optional(),
+    public_id: z.string().optional(),
+    asset_id: z.string().optional()
+  })
+  .passthrough()
+  .refine((data) => Boolean(data.job_id || data.jobId), {
+    message: 'job_id or jobId is required (in request body or query string)',
+    path: ['job_id']
+  });
 
 export const validateBody = (schema: z.ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
