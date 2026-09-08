@@ -34,7 +34,7 @@ const envSchema = z.object({
   IMAGE_RETENTION_SECONDS: z.coerce.number().default(86400), // 24 hours
 
   // AI Background Removal API
-  BACKGROUND_REMOVAL_PROVIDER: z.enum(['clipdrop', 'removebg', 'photomaker', 'mock']).default('mock'),
+  BACKGROUND_REMOVAL_PROVIDER: z.enum(['clipdrop', 'removebg', 'photomaker', 'mock', 'n8n']).default('mock'),
   BACKGROUND_REMOVAL_API_URL: z.string().optional().default('https://clipdrop-api.co/remove-background/v1'),
   BACKGROUND_REMOVAL_API_KEY: z.string().optional().default(''),
 

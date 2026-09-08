@@ -71,13 +71,13 @@ app.use(
   })
 );
 
-app.options('*', (_req, res) => res.sendStatus(204));
+app.options('*', (_req: express.Request, res: express.Response) => res.sendStatus(204));
 
 // Capture raw body for Razorpay webhook cryptographic verification
 app.use(
   express.json({
     limit: '15mb',
-    verify: (req: any, _res, buf) => {
+    verify: (req: express.Request & { rawBody?: string }, _res: express.Response, buf: Buffer) => {
       req.rawBody = buf.toString();
     }
   })
@@ -91,7 +91,7 @@ app.use('/api', apiLimiter);
 app.use('/api', apiRouter);
 
 // 404 handler for undefined endpoints
-app.use((req, res) => {
+app.use((req: express.Request, res: express.Response) => {
   return sendError(res, 404, 'NOT_FOUND', `Cannot ${req.method} ${req.path}`);
 });
 
