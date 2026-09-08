@@ -27,54 +27,66 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshUsage = async () => {
     try {
       const res = await apiClient.get<any>('/usage');
-      if (res.data) {
+      if (res && res.data) {
         setUsage(res.data as UserUsage);
       }
     } catch (err) {
-      console.error('Failed to fetch usage', err);
+      console.warn('Usage unavailable — backend may be offline. Continue with demo values.', err);
     }
   };
 
   // Sync session on mount
   useEffect(() => {
+    let cancelled = false;
+
     const initAuth = async () => {
       const storedToken = localStorage.getItem('snapcut_auth_token');
       if (!storedToken) {
-        // Automatically provide demo session so user can immediately test without friction
         loginAsDemoUser();
-        setLoading(false);
+        if (!cancelled) setLoading(false);
         return;
       }
 
       try {
         const profileRes = await apiClient.get('/profile');
-        if (profileRes.data) {
+        if (!cancelled && profileRes && profileRes.data) {
           setUser(profileRes.data);
           await refreshUsage();
+        } else if (!cancelled) {
+          loginAsDemoUser();
         }
       } catch (err) {
-        console.warn('Session expired or invalid token', err);
+        console.warn('Session expired or invalid token — falling back to demo user', err);
         loginAsDemoUser();
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     initAuth();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = async (email: string, password?: string) => {
     setLoading(true);
     try {
-      // In production, invoke Supabase auth.signInWithPassword
       const demoToken = email.includes('admin') ? 'demo-token-admin' : 'demo-token-user';
       localStorage.setItem('snapcut_auth_token', demoToken);
       setToken(demoToken);
 
-      const profileRes = await apiClient.get('/profile');
-      if (profileRes.data) {
-        setUser(profileRes.data);
-        await refreshUsage();
+      try {
+        const profileRes = await apiClient.get('/profile');
+        if (profileRes && profileRes.data) {
+          setUser(profileRes.data);
+          await refreshUsage();
+        } else {
+          loginAsDemoUser();
+        }
+      } catch (err) {
+        console.warn('Profile fetch failed on login — falling back to demo user', err);
+        loginAsDemoUser();
       }
     } finally {
       setLoading(false);
@@ -88,13 +100,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem('snapcut_auth_token', demoToken);
       setToken(demoToken);
 
-      if (displayName) {
-        await apiClient.put('/profile', { displayName });
-      }
-      const profileRes = await apiClient.get('/profile');
-      if (profileRes.data) {
-        setUser(profileRes.data);
-        await refreshUsage();
+      try {
+        if (displayName) {
+          await apiClient.put('/profile', { displayName });
+        }
+        const profileRes = await apiClient.get('/profile');
+        if (profileRes && profileRes.data) {
+          setUser(profileRes.data);
+          await refreshUsage();
+        } else {
+          loginAsDemoUser();
+        }
+      } catch (err) {
+        console.warn('Signup profile sync failed — falling back to demo user', err);
+        loginAsDemoUser();
       }
     } finally {
       setLoading(false);
