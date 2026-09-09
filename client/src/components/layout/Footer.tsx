@@ -82,18 +82,28 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-xs">
               <li>
                 <Link to="/privacy" className="hover:text-white transition-colors">
-                  Privacy Policy & Retention
+                  Privacy Policy
                 </Link>
               </li>
               <li>
                 <Link to="/terms" className="hover:text-white transition-colors">
-                  Terms of Service
+                  Terms and Conditions
                 </Link>
               </li>
               <li>
-                <span className="text-[#707B9E]">
-                  Razorpay 256-bit Encrypted Checkout
-                </span>
+                <Link to="/refunds" className="hover:text-white transition-colors">
+                  Cancellation &amp; Refunds
+                </Link>
+              </li>
+              <li>
+                <Link to="/shipping" className="hover:text-white transition-colors">
+                  Shipping &amp; Delivery
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-white transition-colors">
+                  Contact Us
+                </Link>
               </li>
             </ul>
           </div>
@@ -104,6 +114,8 @@ export const Footer: React.FC = () => {
           <div className="flex items-center space-x-6">
             <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
+            <Link to="/refunds" className="hover:text-white transition-colors">Refunds</Link>
+            <Link to="/shipping" className="hover:text-white transition-colors">Shipping</Link>
             <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
           </div>
         </div>

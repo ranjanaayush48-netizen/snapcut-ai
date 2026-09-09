@@ -118,8 +118,8 @@ class N8nService {
       const filename = payload.originalFilename || 'upload.png';
       const mimeType = payload.mimeType || 'application/octet-stream';
 
-      // n8n Webhook stores this as binary.data (default binary property)
-      form.append('data', payload.imageBuffer, {
+      // n8n Webhook stores multipart files on the binary object using the field name
+      form.append('image', payload.imageBuffer, {
         filename,
         contentType: mimeType,
         knownLength: payload.imageBuffer.length

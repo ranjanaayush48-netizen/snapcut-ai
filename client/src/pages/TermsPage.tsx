@@ -1,43 +1,103 @@
 import React from 'react';
-import { Card } from '../components/ui/Card.js';
+import { Link } from 'react-router-dom';
+import { LegalPage, LegalSection } from '../components/legal/LegalPage.js';
+import { COMPANY } from '../config/company.js';
 
 export const TermsPage: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-10">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-extrabold text-white">Terms of Service</h1>
-        <p className="text-sm text-[#AAB3D0]">Effective Date: September 2026</p>
-      </div>
+    <LegalPage
+      title="Terms and Conditions"
+      subtitle={`These terms govern your use of ${COMPANY.tradeName}, including free daily removals, paid Pro/Business plans, and one-time credit packs billed in INR via Razorpay.`}
+    >
+      <LegalSection title="1. Agreement">
+        <p>
+          By creating an account or paying for {COMPANY.tradeName}, you enter a contract with {COMPANY.legalName}{' '}
+          for a digital background-removal service. If you disagree, do not use the website. Related policies:{' '}
+          <Link className="text-[#00D9FF] underline" to="/privacy">
+            Privacy Policy
+          </Link>
+          ,{' '}
+          <Link className="text-[#00D9FF] underline" to="/refunds">
+            Cancellation &amp; Refunds
+          </Link>
+          , and{' '}
+          <Link className="text-[#00D9FF] underline" to="/shipping">
+            Shipping &amp; Delivery
+          </Link>
+          .
+        </p>
+      </LegalSection>
 
-      <Card className="p-8 space-y-6 bg-[#080B1A] text-xs text-[#AAB3D0] leading-relaxed">
-        <section className="space-y-2">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">1. Acceptance of Terms</h2>
-          <p>
-            By accessing or using SnapCut AI, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the service.
-          </p>
-        </section>
+      <LegalSection title="2. The service">
+        <p>
+          {COMPANY.tradeName} lets you upload JPG, PNG, or WEBP files (subject to size limits on your plan) and
+          receive a transparent PNG with the background removed by automated AI. Output quality depends on lighting,
+          contrast, hair, and transparency in the source photo. We do not guarantee a perfect cutout for every image.
+        </p>
+      </LegalSection>
 
-        <section className="space-y-2">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">2. Permitted Use</h2>
-          <p>
-            You agree not to upload content that violates third-party copyright, contains illegal or abusive materials, or attempts to circumvent server usage quotas and rate limits.
-          </p>
-        </section>
+      <LegalSection title="3. Accounts and acceptable use">
+        <ul className="list-disc pl-5 space-y-1.5">
+          <li>You must be 18+ and legally able to contract in India.</li>
+          <li>Do not upload unlawful, infringing, or abusive content, or images of people without rights to process them.</li>
+          <li>Do not reverse-engineer, overload, or resell the API without a Business licence.</li>
+          <li>We may suspend accounts that abuse quotas, chargeback without cause, or violate these terms.</li>
+        </ul>
+      </LegalSection>
 
-        <section className="space-y-2">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">3. Subscriptions, Credits & Refunds</h2>
-          <p>
-            Subscriptions renew automatically unless cancelled before the end of the billing period. Unused credits purchased through credit top-up packs remain active indefinitely. In the event of a processing failure, processing quotas and credits are automatically credited back to your account.
-          </p>
-        </section>
+      <LegalSection title="4. Plans, credits, and pricing">
+        <p>
+          Current prices are published on the{' '}
+          <Link className="text-[#00D9FF] underline" to="/pricing">
+            Pricing
+          </Link>{' '}
+          page in Indian Rupees. Free users receive a daily allowance of background removals. Pro and Business are
+          prepaid monthly access plans that grant a pool of AI credits. Credit packs are one-time digital purchases
+          and do not auto-renew. Unused purchased credits do not expire unless the account is closed for breach.
+        </p>
+        <p>
+          Payments are collected by Razorpay on our behalf using UPI, cards, netbanking, and wallets. GST, if
+          applicable, is included or shown at checkout according to our tax registration.
+        </p>
+      </LegalSection>
 
-        <section className="space-y-2">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">4. Service Availability & Disclaimers</h2>
-          <p>
-            SnapCut AI strives for 99.9% uptime, but does not warrant that AI processing will be uninterrupted or error-free for all photographic conditions.
-          </p>
-        </section>
-      </Card>
-    </div>
+      <LegalSection title="5. Intellectual property">
+        <p>
+          You keep all rights in photos you upload and in the transparent PNG we generate for you. {COMPANY.tradeName}{' '}
+          retains rights in the website, models orchestration, brand, and software. You grant us a limited licence to
+          process the file solely to deliver the cutout.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="6. Availability">
+        <p>
+          We target high uptime but AI providers, n8n automation, or cloud storage may fail. If a job fails, credits
+          or daily quota for that attempt are restored as described in the refund policy.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="7. Liability">
+        <p>
+          To the maximum extent permitted by Indian law, {COMPANY.legalName} is not liable for indirect or
+          consequential loss, lost profits, or data after the 24-hour retention window. Our aggregate liability for a
+          paid order is limited to the amount you paid for that order.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="8. Governing law">
+        <p>
+          These terms are governed by the laws of India. Courts at the location of our registered office have
+          exclusive jurisdiction, subject to mandatory consumer-protection venues.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="9. Contact">
+        <p>
+          {COMPANY.tradeName} | {COMPANY.supportEmail} | {COMPANY.phone}
+          <br />
+          {COMPANY.registeredAddress}
+        </p>
+      </LegalSection>
+    </LegalPage>
   );
 };

@@ -1,71 +1,112 @@
 import React from 'react';
-import { Card } from '../components/ui/Card.js';
-import { ShieldCheck, Lock, Clock, Database } from 'lucide-react';
+import { LegalPage, LegalSection } from '../components/legal/LegalPage.js';
+import { COMPANY } from '../config/company.js';
 
 export const PrivacyPage: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-10">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-extrabold text-white">Privacy Policy & Image Retention</h1>
-        <p className="text-sm text-[#AAB3D0]">Last updated: September 2026</p>
-      </div>
+    <LegalPage
+      title="Privacy Policy"
+      subtitle={`${COMPANY.tradeName} explains how we collect, use, store, and delete information when you use our AI background-removal service.`}
+    >
+      <LegalSection title="1. Who we are">
+        <p>
+          This policy is issued by <strong className="text-white">{COMPANY.legalName}</strong> (trade name{' '}
+          <strong className="text-white">{COMPANY.tradeName}</strong>), an Indian digital software service that
+          removes image backgrounds and delivers transparent PNG files online. Website:{' '}
+          <a className="text-[#00D9FF] underline" href={COMPANY.websiteUrl}>
+            {COMPANY.websiteUrl}
+          </a>
+          .
+        </p>
+        <p>
+          Questions: {COMPANY.supportEmail} | {COMPANY.phone}
+          <br />
+          Registered office: {COMPANY.registeredAddress}
+        </p>
+      </LegalSection>
 
-      <Card className="p-8 space-y-8 bg-[#080B1A]">
-        {/* Core Principles */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[#00D9FF]" />
-            1. Image Handling & Privacy Principles
-          </h2>
-          <p className="text-xs text-[#AAB3D0] leading-relaxed">
-            SnapCut AI treats all user uploads with strict confidentiality. When you upload a photo to SnapCut AI:
-          </p>
-          <ul className="list-disc pl-5 text-xs text-[#AAB3D0] space-y-1.5 leading-relaxed">
-            <li>Images are processed exclusively for the purpose of identifying foreground subjects and extracting transparent backgrounds.</li>
-            <li>Images are temporarily stored in secure Cloudinary storage buckets solely to allow rendering and browser download of the finished transparent PNG.</li>
-            <li>Images are never permanently stored or archived by default.</li>
-            <li>Your uploaded media and cutout results are <strong>never</strong> used, sold, or shared to train machine learning models.</li>
-          </ul>
-        </section>
+      <LegalSection title="2. Information we collect and why">
+        <ul className="list-disc pl-5 space-y-1.5">
+          <li>
+            <strong className="text-white">Account data:</strong> name, email, and hashed password so we can create
+            your studio login, show usage, and send receipts.
+          </li>
+          <li>
+            <strong className="text-white">Uploaded photographs:</strong> processed only to detect the subject,
+            remove the background, and let you preview/download a transparent PNG.
+          </li>
+          <li>
+            <strong className="text-white">Usage records:</strong> job timestamps, file size, plan, and remaining
+            daily/credit quota so we can enforce fair-use limits.
+          </li>
+          <li>
+            <strong className="text-white">Payment metadata:</strong> order id, payment id, amount, and plan or
+            credit pack purchased. Card, UPI PIN, and CVV are collected by Razorpay, not by SnapCut AI.
+          </li>
+          <li>
+            <strong className="text-white">Device logs:</strong> IP address, browser type, and error traces for
+            security, fraud prevention, and debugging.
+          </li>
+        </ul>
+        <p>We do not sell personal data. We do not use your photos to train public machine-learning models.</p>
+      </LegalSection>
 
-        {/* Retention Policy */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Clock className="w-5 h-5 text-[#6C3BFF]" />
-            2. 24-Hour Temporary Retention Policy
-          </h2>
-          <p className="text-xs text-[#AAB3D0] leading-relaxed">
-            In accordance with our infrastructure configuration, both original uploads and processed transparent PNGs are tagged with automated retention headers and lifecycle policies:
-          </p>
-          <ul className="list-disc pl-5 text-xs text-[#AAB3D0] space-y-1.5 leading-relaxed">
-            <li>Temporary original and transparent assets automatically expire and are purged within <strong>24 hours</strong> of upload.</li>
-            <li>Users may also manually request asset deletion at any time via their History view or account settings.</li>
-            <li>After the retention period expires, previously generated download URLs become unavailable.</li>
-          </ul>
-        </section>
+      <LegalSection title="3. Image handling and 24-hour retention">
+        <p>
+          Uploads and cutouts are stored only long enough to finish processing and let you download the result.
+          Temporary cloud assets are tagged for automatic deletion within <strong className="text-white">24 hours</strong>.
+          After expiry, download links stop working. You may request earlier deletion from History or by emailing{' '}
+          {COMPANY.supportEmail}.
+        </p>
+      </LegalSection>
 
-        {/* Security & Payments */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Lock className="w-5 h-5 text-[#F02BFF]" />
-            3. Payment Data Security
-          </h2>
-          <p className="text-xs text-[#AAB3D0] leading-relaxed">
-            All financial transactions are conducted directly through Razorpay, a PCI-DSS Level 1 compliant payment gateway. SnapCut AI does not collect, view, or store credit card numbers, CVVs, or UPI PINs on its servers.
-          </p>
-        </section>
+      <LegalSection title="4. Processors we use">
+        <ul className="list-disc pl-5 space-y-1.5">
+          <li>Cloud storage and CDN partners for temporary image hosting.</li>
+          <li>Automation and AI providers that receive the binary image solely to remove the background.</li>
+          <li>
+            Razorpay Software Private Limited for checkout, UPI, cards, netbanking, wallets, refunds, and GST
+            invoices. Razorpay is PCI-DSS certified. SnapCut AI never stores full card numbers.
+          </li>
+        </ul>
+      </LegalSection>
 
-        {/* Data Ownership */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Database className="w-5 h-5 text-[#00D9FF]" />
-            4. User Rights & Account Deletion
-          </h2>
-          <p className="text-xs text-[#AAB3D0] leading-relaxed">
-            You retain 100% intellectual property ownership of your original imagery and all generated transparent assets. You can delete your account and associated history anytime in your profile settings.
-          </p>
-        </section>
-      </Card>
-    </div>
+      <LegalSection title="5. Legal bases and sharing">
+        <p>
+          We process data to perform the service you request (contract), to prevent abuse (legitimate interest /
+          legal obligation), and to comply with Indian law including the Digital Personal Data Protection Act, 2023
+          and applicable IT Rules. We share data only with processors listed above, with law-enforcement when
+          legally required, or if you instruct us to.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="6. Cookies">
+        <p>
+          We use essential cookies/local storage for login session, plan status, and checkout. We do not run third-party
+          advertising pixels on studio pages.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="7. Your rights">
+        <p>
+          You may access, correct, or delete your account, export job history where available, and withdraw consent
+          by closing the account. Contact the Grievance Officer {COMPANY.grievanceOfficer} at {COMPANY.grievanceEmail}.
+          We respond within 15 days where required by law.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="8. Children">
+        <p>
+          SnapCut AI is intended for users 18 years and older. We do not knowingly collect data from children.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="9. Changes">
+        <p>
+          Material updates will be posted on this page with a new “Last updated” date. Continued use after the update
+          means you accept the revised policy.
+        </p>
+      </LegalSection>
+    </LegalPage>
   );
 };

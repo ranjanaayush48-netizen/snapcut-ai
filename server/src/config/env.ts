@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(here, '../../../.env') });
 dotenv.config({ path: path.resolve(here, '../../.env') });
 dotenv.config({ path: path.resolve(here, '../.env') });
 dotenv.config();
@@ -24,7 +25,7 @@ const envSchema = z.object({
   N8N_WEBHOOK_URL: z
     .string()
     .optional()
-    .default('https://asdfgfdf.app.n8n.cloud/webhook/remove-background'),
+    .default('https://ayushranjan2126.app.n8n.cloud/webhook/remove-background'),
   N8N_WEBHOOK_SECRET: z.string().optional().default('snapcut-dev-secret-token'),
 
   // Cloudinary
@@ -39,9 +40,9 @@ const envSchema = z.object({
   BACKGROUND_REMOVAL_API_KEY: z.string().optional().default(''),
 
   // Razorpay
-  RAZORPAY_KEY_ID: z.string().optional().default('rzp_test_mock_key_id'),
-  RAZORPAY_KEY_SECRET: z.string().optional().default('mock_razorpay_secret_token'),
-  RAZORPAY_WEBHOOK_SECRET: z.string().optional().default('mock_webhook_secret'),
+  RAZORPAY_KEY_ID: z.string().trim().optional().default('rzp_test_mock_key_id'),
+  RAZORPAY_KEY_SECRET: z.string().trim().optional().default('mock_razorpay_secret_token'),
+  RAZORPAY_WEBHOOK_SECRET: z.string().trim().optional().default('mock_webhook_secret'),
 
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),

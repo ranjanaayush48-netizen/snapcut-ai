@@ -359,7 +359,7 @@ export const LandingPage: React.FC = () => {
             Simple, Predictable Plans
           </h3>
           <p className="text-sm text-[#AAB3D0] max-w-lg mx-auto">
-            Start free with 5 daily removals. Upgrade anytime for priority processing and bulk volume.
+            Start free with 5 daily removals. Upgrade anytime for priority processing and bulk volume. Payments are collected in INR by Razorpay.
           </p>
         </div>
 

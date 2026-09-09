@@ -93,7 +93,33 @@ export const PricingPage: React.FC = () => {
           Simple, Transparent <span className="text-gradient-brand">Pricing</span>
         </h1>
         <p className="text-sm text-[#AAB3D0]">
-          Choose the monthly subscription plan or pay-as-you-go credit package that fits your volume.
+          Choose the monthly subscription plan or pay-as-you-go credit package that fits your volume. Checkout opens the official Razorpay payment popup.
+        </p>
+        <p className="text-[11px] text-[#707B9E]">
+          Policy pages for Razorpay review:{' '}
+          <a className="text-[#00D9FF] underline" href="/privacy">
+            Privacy
+          </a>
+          {' · '}
+          <a className="text-[#00D9FF] underline" href="/terms">
+            Terms
+          </a>
+          {' · '}
+          <a className="text-[#00D9FF] underline" href="/refunds">
+            Refunds
+          </a>
+          {' · '}
+          <a className="text-[#00D9FF] underline" href="/shipping">
+            Shipping
+          </a>
+          {' · '}
+          <a className="text-[#00D9FF] underline" href="/contact">
+            Contact
+          </a>
+          {' · '}
+          <a className="text-[#00D9FF] underline" href="/about">
+            About
+          </a>
         </p>
       </div>
 
