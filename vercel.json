@@ -13,7 +13,7 @@
       "framework": "express",
       "buildCommand": "npm run build",
       "devCommand": "npm run dev",
-      "entrypoint": "dist/server.js"
+      "entrypoint": "src/app.ts"
     }
   },
   "rewrites": [
